@@ -63,7 +63,7 @@ jobs:
           node-version: "22"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @forge/db build
+      - run: pnpm build # build all packages so @forge/db's workspace deps are present
       - name: tenant-isolation proof suite (§5, release-blocker)
         run: pnpm --filter @forge/db test:isolation
       - name: tenant-scoped RAG retrieval eval (isolation + quality)

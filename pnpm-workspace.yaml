@@ -20,3 +20,9 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-arm64-msvc@15.5.25'
   - '@next/swc-win32-x64-msvc@15.5.25'
   - next@15.5.25
+
+# Force patched versions of transitive dev/build dependencies flagged by audit
+# (dev-tooling advisories that do not affect the shipped @forge/* packages).
+overrides:
+  postcss: ">=8.5.18"
+  vite: ">=6.4.3"
