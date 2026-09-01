@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@import "@forge/ui/styles.css";
+
+/* Tailwind v4 scans the UI kit source so its utility usage is not purged. */
+@source "../../../packages/ui/src";
+
+html,
+body {
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}

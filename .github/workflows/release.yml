@@ -1,0 +1,29 @@
+# release — runs the full gauntlet on a version tag, then (later) builds and
+# attests the Docker image. Runner-unverified
+# until a remote exists.
+#
+# TODO(hardening): SHA-pin every action.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test:arch
+      - run: pnpm typecheck
+      - run: pnpm test
+      # Added with the app/db/e2e: migrate, coverage thresholds, Playwright e2e,
+      # the isolation suite, and a Docker image build with provenance + SBOM +
+      # Trivy scan and a "refuses to boot unconfigured" smoke gate .

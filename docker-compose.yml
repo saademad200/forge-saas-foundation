@@ -1,0 +1,47 @@
+# Local development stack: one command brings up everything the app needs.
+# Non-default host ports so this never collides with a developer's own Postgres or
+# MinIO. Production uses ops/compose.prod.yml (added in P6), not this file.
+services:
+  postgres:
+    # pgvector/pgvector ships Postgres 17 with the vector extension preinstalled;
+    # `CREATE EXTENSION vector` still runs in a migration (Drizzle won't auto-create it).
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: forge
+      POSTGRES_PASSWORD: forge
+      POSTGRES_DB: forge
+      # Deterministic collation for reproducible ordering in tests.
+      POSTGRES_INITDB_ARGS: "--locale=C"
+    ports:
+      # 5434 (not the Postgres default) so this never collides with another local DB.
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forge -d forge"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    volumes:
+      - forge_pgdata:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: forge
+      MINIO_ROOT_PASSWORD: forge-dev-secret
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    volumes:
+      - forge_miniodata:/data
+
+volumes:
+  forge_pgdata:
+  forge_miniodata:

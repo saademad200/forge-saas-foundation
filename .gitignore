@@ -1,0 +1,54 @@
+# ── Internal briefs & scratch (NEVER tracked — authorship/ownership hygiene) ──
+prompt.txt
+prompt*.txt
+/notes/
+/.scratch/
+*.internal.md
+
+# ── Node / pnpm / turbo ──
+node_modules/
+.pnpm-store/
+.turbo/
+dist/
+build/
+out/
+.next/
+coverage/
+*.tsbuildinfo
+.vercel/
+
+# ── Env & secrets (secrets NEVER in code — hard constraint) ──
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# ── Python (only where a module genuinely needs it) ──
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# ── Test / build artifacts ──
+playwright-report/
+test-results/
+.playwright/
+
+# ── OS / editor ──
+.DS_Store
+*.swp
+.idea/
+.vscode/
+!.vscode/extensions.json
+
+# Next.js generated
+next-env.d.ts
+.next/
+
+# Internal strategy record — never public
+/.internal/

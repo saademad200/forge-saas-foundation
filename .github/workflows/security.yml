@@ -1,0 +1,73 @@
+# security — supply-chain and secret hygiene, all free/OSS. Runs the security
+# workflow. Runs on push/PR and a weekly cron. (Runner-unverified until a remote
+# exists; step commands mirror the same steps run locally.)
+#
+# TODO(hardening): SHA-pin every action here and in ci.yml/release.yml.
+name: security
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1" # Monday 06:00 UTC
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # gitleaks scans full history
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: audit (fail on high/critical)
+        run: pnpm audit --audit-level high
+
+  # The isolation proof suite runs as a SEPARATELY NAMED, merge-blocking job so
+  # "tenant isolation broke" is legible on the PR checks. It
+  # certifies exactly: cross-tenant read AND write denied under app-layer AND RLS,
+  # on relational AND vector data, fail-closed with no tenant.
+  isolation:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: forge
+          POSTGRES_PASSWORD: forge
+          POSTGRES_DB: forge
+        ports: ["5434:5432"]
+        options: >-
+          --health-cmd "pg_isready -U forge -d forge"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgres://forge:forge@localhost:5434/forge
+      FORGE_APP_DATABASE_URL: postgres://forge_app:forge_app@localhost:5434/forge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @forge/db build
+      - name: tenant-isolation proof suite (§5, release-blocker)
+        run: pnpm --filter @forge/db test:isolation
+      - name: tenant-scoped RAG retrieval eval (isolation + quality)
+        run: pnpm --filter @forge/rag test:eval
+
+  # Also planned: a "no secret in the client bundle" check and Semgrep
+  # (p/typescript, p/nodejs, p/owasp-top-ten) once app code exists.

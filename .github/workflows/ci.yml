@@ -1,0 +1,60 @@
+# CI — the correctness gate.
+#
+# NOTE: written to encode the gates; the individual STEP commands are verified to
+# pass locally (pnpm install --frozen-lockfile / build / typecheck / test / arch),
+# but the workflow itself is not yet run on a GitHub runner (the repo has no remote
+# in this environment). "Green in CI on a fresh runner" is proven once a remote
+# exists — a plan running on a fresh runner is stronger evidence than a local run.
+#
+# TODO(hardening): SHA-pin every third-party action (see the project's
+# supply-chain discipline; security.yml enforces it). Version tags are used for now.
+name: ci
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  # The core needs no database. Running the architecture test and typecheck with
+  # NO services is itself the assertion that the domain/config layers are pure.
+  arch-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: architecture boundary + purity rules
+        run: pnpm test:arch
+      - run: pnpm typecheck
+
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test
+
+  # Added in later phases (kept here as the intended shape):
+  #  integration: Postgres 17 + pgvector service -> migrate -> schema-drift gate
+  #     (db:generate then `git status --porcelain -- drizzle` must be empty) -> coverage.
+  #  e2e: Playwright + the acceptance harness (forge new app / add feature / build / e2e).
+  #  isolation: the §5 cross-tenant proof suite as a named, merge-blocking job.

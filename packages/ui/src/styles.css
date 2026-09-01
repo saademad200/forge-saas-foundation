@@ -1,0 +1,137 @@
+/*
+ * Forge design tokens. Intentionally NOT a generic admin-template palette: warm
+ * graphite neutrals with a single confident EMBER accent (on-brand for "Forge" —
+ * the fire of a forge), a real type scale, and generous radii. Theme-aware: the
+ * dark palette swaps the roles. Consumed by the app via `@import "@forge/ui/styles.css"`.
+ */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Menlo", monospace;
+
+  /* Warm graphite neutrals (not pure gray — a hint of warmth reads as intentional). */
+  --color-ink-50: #faf9f7;
+  --color-ink-100: #f2f0ec;
+  --color-ink-200: #e4e0d9;
+  --color-ink-300: #cdc7bd;
+  --color-ink-400: #a8a094;
+  --color-ink-500: #837b6e;
+  --color-ink-600: #635c52;
+  --color-ink-700: #48423b;
+  --color-ink-800: #2c2823;
+  --color-ink-900: #1a1713;
+  --color-ink-950: #0f0d0b;
+
+  /* Ember accent. */
+  --color-ember-50: #fff7ed;
+  --color-ember-100: #ffedd5;
+  --color-ember-300: #fdba74;
+  --color-ember-500: #f97316;
+  --color-ember-600: #ea580c;
+  --color-ember-700: #c2410c;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+/* Semantic surface tokens, theme-aware. */
+:root {
+  --surface: var(--color-ink-50);
+  --surface-raised: #ffffff;
+  --border: var(--color-ink-200);
+  --text: var(--color-ink-900);
+  --text-muted: var(--color-ink-500);
+  --accent: var(--color-ember-600);
+  --accent-contrast: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface: var(--color-ink-950);
+    --surface-raised: var(--color-ink-900);
+    --border: var(--color-ink-800);
+    --text: var(--color-ink-100);
+    --text-muted: var(--color-ink-400);
+    --accent: var(--color-ember-500);
+    --accent-contrast: var(--color-ink-950);
+  }
+}
+
+:root[data-theme="dark"] {
+  --surface: var(--color-ink-950);
+  --surface-raised: var(--color-ink-900);
+  --border: var(--color-ink-800);
+  --text: var(--color-ink-100);
+  --text-muted: var(--color-ink-400);
+  --accent: var(--color-ember-500);
+  --accent-contrast: var(--color-ink-950);
+}
+
+/*
+ * Component classes ship here (not as Tailwind utilities on the components) so the
+ * kit works in any consuming app without cross-package Tailwind content scanning.
+ */
+.forge-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 550;
+  font-size: 0.875rem;
+  line-height: 1;
+  border-radius: var(--radius-md);
+  padding: 0.625rem 1rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+.forge-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.forge-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.forge-btn--primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+.forge-btn--primary:hover:not(:disabled) {
+  background: var(--color-ember-700);
+}
+.forge-btn--secondary {
+  background: var(--surface-raised);
+  color: var(--text);
+  border-color: var(--border);
+}
+.forge-btn--secondary:hover:not(:disabled) {
+  border-color: var(--color-ink-400);
+}
+.forge-btn--ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+.forge-btn--ghost:hover:not(:disabled) {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.forge-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+.forge-card__title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text);
+  margin: 0 0 0.25rem;
+}
+.forge-card__desc {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}

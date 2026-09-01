@@ -1,0 +1,16 @@
+{
+  "entity": "invoice",
+  "orgScoped": true,
+  "fields": [
+    { "name": "number", "type": "text", "required": true },
+    { "name": "amountCents", "type": "integer", "required": true },
+    { "name": "paid", "type": "boolean", "required": false },
+    { "name": "memo", "type": "text", "required": false }
+  ],
+  "permissions": {
+    "read": ["owner", "admin", "member"],
+    "create": ["owner", "admin"],
+    "update": ["owner", "admin"],
+    "delete": ["owner"]
+  }
+}

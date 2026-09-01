@@ -1,0 +1,25 @@
+{
+  "name": "@forge/example-feature",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "gen": "tsx ../../tooling/forge-cli/src/cli.ts add-feature --spec ./invoice.spec.json --out ./src",
+    "check-drift": "tsx ../../tooling/forge-cli/src/cli.ts check-drift --spec ./invoice.spec.json --out ./src",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@forge/db": "workspace:*",
+    "@forge/policy": "workspace:*",
+    "drizzle-orm": "^0.45.2"
+  },
+  "devDependencies": {
+    "@forge/cli": "workspace:*",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
